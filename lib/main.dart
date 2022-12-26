@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:semi_project_bookchat_app/view/chat.dart';
-import 'package:semi_project_bookchat_app/view/tagroom.dart';
-
+import 'view/chat.dart';
 import 'view/home.dart';
 
 void main() {
@@ -20,16 +18,16 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const Home(),
-      // getPages: [
-      //   GetPage(
-      //     name: "/chat",
-      //     page: () => Chat(),
-      //   ),
-      //   GetPage(
-      //     name: "/tagroom",
-      //     page: () => TagRoom(),
-      //   ),
-      // ],
+      getPages: [
+        GetPage(
+          name: "/chat",
+          page: () => const Chat(),
+        ),
+        // GetPage(
+        //   name: "/tagroom",
+        //   page: () => TagRoom(),
+        // ),
+      ],
       // getX 필요시 오픈
     );
   }
