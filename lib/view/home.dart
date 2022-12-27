@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:semi_project_bookchat_app/view/tagroom.dart';
-import 'mainpage.dart';
+import 'main/mainpage.dart';
 import 'package:get/get.dart';
 
 class Home extends StatefulWidget {

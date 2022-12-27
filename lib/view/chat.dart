@@ -2,7 +2,11 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:semi_project_bookchat_app/database/book_db.dart';
+import 'package:semi_project_bookchat_app/database/chat_db.dart';
+import 'package:semi_project_bookchat_app/database/create_database.dart';
 import 'package:semi_project_bookchat_app/model/book_info.dart';
+import 'package:semi_project_bookchat_app/model/chats.dart';
 import 'package:semi_project_bookchat_app/view/book_search.dart';
 
 class Chat extends StatefulWidget {
@@ -13,17 +17,40 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatState extends State<Chat> {
-  List<String> chats = ['1', '2', '3', '4'];
+  late CreateDB createDB;
+  late ChatDB chatDB;
+  late BookDB bookDB;
+
   List<String> tags = ['#hi', '#필사', '#my', '#hello'];
   late TextEditingController tfBookController;
   late TextEditingController tfChatController;
-  String result = '';
+  late int currentBookId;
+  late String currentBookTitle;
 
   @override
   void initState() {
     super.initState();
+    createDB = CreateDB();
+    chatDB = ChatDB();
+    // 처음 접속한 경우 DB 만들어주기
+    createDB.initializeDB().whenComplete(() async {
+      setState(() {});
+    });
     tfBookController = TextEditingController();
     tfChatController = TextEditingController();
+    bookDB = BookDB();
+    currentBookId = 0;
+    currentBook();
+
+    //임시 함수
+    bookDataCount();
+  }
+
+  // book data 잘 들어가는지 확인 용도 임시 함수
+  bookDataCount() async {
+    List list = await bookDB.queryBooks();
+
+    print('book count: ${list.length}');
   }
 
   @override
@@ -66,7 +93,7 @@ class _ChatState extends State<Chat> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       SizedBox(
-                        width: 180,
+                        width: 190,
                         height: 60,
                         child: TextField(
                           controller: tfBookController,
@@ -86,13 +113,6 @@ class _ChatState extends State<Chat> {
                           getJSONData();
                           await Get.to(const BookSearch());
                           tfSearchBarRefresh();
-
-                          // var url = Uri.parse('http://www.google.com');
-                          // var response = await http.get(url);
-                          // setState(() {
-                          //   result = response.body;
-                          // });
-                          // print(result);
                         },
                         icon: const Icon(
                           Icons.search,
@@ -103,60 +123,85 @@ class _ChatState extends State<Chat> {
                   ),
                 ),
               ),
-              //============================================================= chat list
+              //============================================================= chat list 시작
               Expanded(
-                child: ListView.builder(
-                  itemCount: chats.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 226, 226, 226),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                            bottomLeft: Radius.circular(20),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          // -------------------------------------------- chat bubble
-                          child: Text(chats[index].toString()),
-                        ),
-                      ),
-                    );
+                child: FutureBuilder(
+                  // chat DB에서 불러오기
+                  future: chatDB.queryChats(currentBookId),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<List<Chats>> snapshot) {
+                    if (snapshot.hasData) {
+                      return ListView.builder(
+                        itemCount: snapshot.data?.length,
+                        shrinkWrap: true,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Color.fromARGB(255, 226, 226, 226),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(20),
+                                  topRight: Radius.circular(20),
+                                  bottomLeft: Radius.circular(20),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                // -------------------------------------------- chat bubble
+                                child: Text(snapshot.data![index].cContent),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    } else {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
                   },
                 ),
               ),
               //============================================================= keyboard
+              // ----------------------------------------------------------- keyword
               SizedBox(
                 height: 40,
                 width: MediaQuery.of(context).size.width,
                 child: Row(
                   children: [
-                    ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      itemCount: tags.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          height: 30,
-                          decoration: const BoxDecoration(
-                            color: Color.fromARGB(255, 226, 226, 226),
-                            borderRadius: BorderRadius.all(Radius.circular(15)),
-                          ),
-                          child: Text(tags[index]),
-                          // child: Text('aa'),
-                        );
-                      },
+                    Expanded(
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        shrinkWrap: true,
+                        itemCount: tags.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            //  --------------------------------------------- 키워드 각각 버튼
+                            child: OutlinedButton(
+                              onPressed: () {
+                                //
+                              },
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: const Color(0xFFF5F5F5),
+                                foregroundColor: const Color(0xFF616161),
+                                minimumSize: const Size(80, 35),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              child: Text(tags[index]),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
               ),
+              // ========================================================= 채팅 row 시작
               Row(
-                // mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(width: 5),
@@ -188,6 +233,11 @@ class _ChatState extends State<Chat> {
                     color: const Color(0xff9AB6FF),
                     onPressed: () {
                       //tfChatController 전송
+                      setState(() {
+                        addChat();
+                        // regExp();
+                        tfChatController.text = "";
+                      });
                     },
                     icon: const Icon(Icons.send),
                   ),
@@ -200,9 +250,19 @@ class _ChatState extends State<Chat> {
     );
   }
 
+//  funcs ================================================================
+
+  // 카카오 book api 정보 가져오기
   Future<String> getJSONData() async {
+    // null 들어오면 "가"로 치환해준다.
+    String inputQuery = tfBookController.text.trim().isEmpty
+        ? "가"
+        : tfBookController.text.trim();
+
     var url = Uri.parse(
-        'https://dapi.kakao.com/v3/search/book?target=title&query=doit');
+        // query: tf로 사용자가 치는 부분
+        // target: query의 타겟?
+        'https://dapi.kakao.com/v3/search/book?target=title&query=$inputQuery');
     var response = await http.get(url,
         headers: {"Authorization": "KakaoAK 9b30e9bc59db5e19c100866becbf583a"});
 
@@ -216,10 +276,42 @@ class _ChatState extends State<Chat> {
     return response.body;
   }
 
+  // 가장 위 검색바에 api로 받아온 제목 넣어주기
   tfSearchBarRefresh() {
     print('set state ${BookInfo.bookTitle}, ${tfBookController.text}');
+
     setState(() {
       tfBookController.text = BookInfo.bookTitle;
     });
+    currentBookTitle = BookInfo.bookTitle;
+
+    currentBook();
   }
-}//END
+
+  // 채팅 DB에 insert
+  Future<int> addChat() async {
+    Chats chat = Chats(
+        cDate: 20221226, cContent: tfChatController.text, bId: currentBookId);
+    await chatDB.insertChat(chat);
+    return 0;
+  }
+
+  // init state 현재 책
+  currentBook() async {
+    List currrentBook = await bookDB.selectCurrentBook();
+    print('currentBTitle: ${currrentBook[0].bTitle}');
+    print('currentBId: ${currrentBook[0].bId}');
+    tfBookController.text = currrentBook[0].bTitle;
+    currentBookId = currrentBook[0].bId;
+  }
+
+// 키워드 뽑아내는 정규식
+  regExp() {
+    RegExp exp = RegExp(r'[#-\s]');
+    // Iterable<RegExpMatch> match = exp.allMatches(tfChatController.text);
+    // print(exp(tfChatController.text)); // "Parse"
+    void match(String str, String regexp) {
+      // var text = '$'
+    }
+  }
+} //END
