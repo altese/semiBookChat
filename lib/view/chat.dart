@@ -8,6 +8,7 @@ import 'package:semi_project_bookchat_app/database/create_database.dart';
 import 'package:semi_project_bookchat_app/model/book_info.dart';
 import 'package:semi_project_bookchat_app/model/chats.dart';
 import 'package:semi_project_bookchat_app/view/book_search.dart';
+import 'package:hashtagable/hashtagable.dart';
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -27,6 +28,9 @@ class _ChatState extends State<Chat> {
   late int currentBookId;
   late String currentBookTitle;
 
+  //태그 글자
+  late String tagText;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +47,9 @@ class _ChatState extends State<Chat> {
 
     //임시 함수
     bookDataCount();
+
+    //태그글자 초기값
+    tagText = '';
   }
 
   // book data 잘 들어가는지 확인 용도 임시 함수
@@ -149,7 +156,18 @@ class _ChatState extends State<Chat> {
                               child: Padding(
                                 padding: const EdgeInsets.all(15.0),
                                 // -------------------------------------------- chat bubble
-                                child: Text(snapshot.data![index].cContent),
+                                //Text위젯대신에 HashTagText 위젯사용
+                                child: HashTagText(
+                                  text: snapshot.data![index].cContent,
+                                  //기본글씨
+                                  basicStyle: const TextStyle(
+                                      fontSize: 15, color: Colors.black),
+                                  //태그 글씨
+                                  decoratedStyle: const TextStyle(
+                                      fontSize: 15,
+                                      color: Color.fromARGB(255, 241, 57, 125),
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           );
@@ -215,7 +233,7 @@ class _ChatState extends State<Chat> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       // ------------------------------------------------- 채팅 tf
-                      child: TextField(
+                      child: HashTagTextField(
                         controller: tfChatController,
                         decoration: const InputDecoration(
                           enabledBorder: UnderlineInputBorder(
@@ -225,6 +243,27 @@ class _ChatState extends State<Chat> {
                             borderSide: BorderSide(color: Colors.transparent),
                           ),
                         ),
+                        //기본글자
+                        basicStyle:
+                            const TextStyle(fontSize: 15, color: Colors.black),
+                        //태그 들어간 글자
+                        decoratedStyle: const TextStyle(
+                            fontSize: 15,
+                            color: Color.fromARGB(255, 241, 57, 125),
+                            fontWeight: FontWeight.bold),
+
+                        //태그글자를 담는역할
+                        onDetectionTyped: (text) {
+                          setState(() {
+                            tagText = text;
+                          });
+                          // print(text);
+                        },
+
+                        ///태그글자를 print로 찍는역할, tagText가 태그 글자이다.
+                        onDetectionFinished: () {
+                          print(tagText);
+                        },
                       ),
                     ),
                   ),
