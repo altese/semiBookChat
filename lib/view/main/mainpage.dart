@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:semi_project_bookchat_app/view/main/ing_book_list.dart';
+import 'package:semi_project_bookchat_app/view/main/read_book_list.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -7,55 +9,65 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage>
+    with SingleTickerProviderStateMixin {
+  late TabController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TabController(length: 2, vsync: this);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 1.0,
+        toolbarHeight: 40,
+        // 그림자
+        elevation: 0.5,
         leading: IconButton(
           onPressed: () {
             //
           },
           icon: const Icon(
             Icons.menu,
-            color: Color.fromARGB(255, 72, 72, 72),
+            color: Color(0xFF616161),
           ),
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
-        child: Row(
+        child: Column(
           children: [
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                backgroundColor: const Color(0xFFF5F5F5),
-                foregroundColor: const Color(0xFF616161),
-                minimumSize: const Size(80, 35),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+            SizedBox(
+              height: 35,
+              width: 250,
+              child: TabBar(
+                controller: controller,
+                //선택된것 글씨색상
+                labelColor: const Color(0xFFF5F5F5),
+                //선택안된것 글씨색상
+                unselectedLabelColor: const Color(0xFF616161),
+                tabs: const [
+                  Tab(text: "읽고 있는 책"),
+                  Tab(text: "읽은 책"),
+                ],
+                indicator: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                  color: const Color(0xFF616161).withOpacity(0.8),
                 ),
               ),
-              onPressed: () {
-                //
-              },
-              child: const Text('읽은 책'),
             ),
-            const SizedBox(width: 10),
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                backgroundColor: const Color(0xFFF5F5F5),
-                foregroundColor: const Color(0xFF616161),
-                minimumSize: const Size(80, 35),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
+            Expanded(
+              child: TabBarView(
+                controller: controller,
+                children: const [
+                  ReadBookList(),
+                  IngBookList(),
+                ],
               ),
-              onPressed: () {
-                //
-              },
-              child: const Text('읽고 있는 책'),
             ),
           ],
         ),

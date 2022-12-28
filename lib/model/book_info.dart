@@ -1,6 +1,8 @@
 class BookInfo {
   // api 받아와서 넣어두는 list
   static List books = [];
+  // 책들  넣어두는 list
+  static List bookList = [];
   // api에서 책 제목만 추출
   static String bookTitle = "";
 
@@ -8,7 +10,7 @@ class BookInfo {
   final int? bId;
   final String bTitle;
   final String? bPublisher;
-  final String? bThumbnail;
+  final String bThumbnail;
   final String? bAuthors;
   final String? bTranslators;
   final String? bContents;
@@ -17,7 +19,7 @@ class BookInfo {
     this.bId,
     required this.bTitle,
     this.bPublisher,
-    this.bThumbnail,
+    required this.bThumbnail,
     this.bAuthors,
     this.bTranslators,
     this.bContents,

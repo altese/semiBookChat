@@ -19,7 +19,7 @@ class CreateDB {
         await db.execute(
             'create table tag(tId integer primary key autoincrement, tTitle text)');
         await db.execute(
-            'create table regtag(regTagId integer primary key autoincrement, tTitle text, regTagDate Integer, regTagDelDate Integer, bId Integer, FOREIGN KEY (bId) REFERENCES book (bId), cId Integer, FOREIGN KEY (cId) REFERENCES chat (cId))');
+            'create table regtag(regTagId integer primary key autoincrement, regTagDate Integer, regTagDelDate Integer, tId Integer, bId Integer, cId Integer, FOREIGN KEY (tId) REFERENCES tag (tId), FOREIGN KEY (bId) REFERENCES book (bId), FOREIGN KEY (cId) REFERENCES chat (cId))');
       },
 
       // 버전은 내가 지정해주는 거 (내 버전)

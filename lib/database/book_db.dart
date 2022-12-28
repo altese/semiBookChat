@@ -23,6 +23,23 @@ class BookDB {
     return result;
   } //.
 
+  // insert ----------------
+  Future<int> insertDefault() async {
+    int result = 0;
+    final Database db = await createDB.initializeDB();
+    result = await db.rawInsert(
+        'insert into book(bTitle, bPublisher, bThumbnail, bAuthors, bTranslators, bContents) values(?,?,?,?,?,?)',
+        [
+          "기타",
+          "1",
+          "http://image.dongascience.com/Photo/2020/03/5bddba7b6574b95d37b6079c199d7101.jpg",
+          "1",
+          "1",
+          "1"
+        ]);
+    return result;
+  } //.
+
   // select all ----------------
   Future<List<BookInfo>> queryBooks() async {
     final Database db = await createDB.initializeDB();
@@ -40,4 +57,13 @@ class BookDB {
 
     return queryResult.map((e) => BookInfo.fromMap(e)).toList();
   }
+
+  // 싹 delete..
+  Future<int> deleteStudents() async {
+    print('delete');
+    int result = 0;
+    final Database db = await createDB.initializeDB();
+    result = await db.rawDelete('delete from book');
+    return result;
+  } //.
 } //END

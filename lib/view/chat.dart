@@ -33,12 +33,11 @@ class _ChatState extends State<Chat> {
     createDB = CreateDB();
     chatDB = ChatDB();
     // 처음 접속한 경우 DB 만들어주기
-    createDB.initializeDB().whenComplete(() async {
-      setState(() {});
-    });
+
     tfBookController = TextEditingController();
     tfChatController = TextEditingController();
     bookDB = BookDB();
+
     currentBookId = 0;
     currentBook();
 
@@ -110,6 +109,7 @@ class _ChatState extends State<Chat> {
                       // ------------------------------------------------- search 버튼 **
                       IconButton(
                         onPressed: () async {
+                          BookInfo.books = [];
                           getJSONData();
                           await Get.to(const BookSearch());
                           tfSearchBarRefresh();
@@ -268,10 +268,12 @@ class _ChatState extends State<Chat> {
 
     setState(() {
       var dataConvertedToJSON = json.decode(response.body);
-      print(dataConvertedToJSON);
+      // print(dataConvertedToJSON);
 
       List result = dataConvertedToJSON["documents"];
+      // BookInfo.books = [];
       BookInfo.books.addAll(result);
+      print(result);
     });
     return response.body;
   }
@@ -301,8 +303,8 @@ class _ChatState extends State<Chat> {
     List currrentBook = await bookDB.selectCurrentBook();
     print('currentBTitle: ${currrentBook[0].bTitle}');
     print('currentBId: ${currrentBook[0].bId}');
-    tfBookController.text = currrentBook[0].bTitle;
-    currentBookId = currrentBook[0].bId;
+    tfBookController.text = currrentBook[0].bTitle ?? "기타";
+    currentBookId = currrentBook[0].bId ?? 0;
   }
 
 // 키워드 뽑아내는 정규식
