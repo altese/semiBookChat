@@ -5,9 +5,12 @@ import 'package:http/http.dart' as http;
 import 'package:semi_project_bookchat_app/database/book_db.dart';
 import 'package:semi_project_bookchat_app/database/chat_db.dart';
 import 'package:semi_project_bookchat_app/database/create_database.dart';
+import 'package:semi_project_bookchat_app/database/tag_db.dart';
 import 'package:semi_project_bookchat_app/model/book_info.dart';
 import 'package:semi_project_bookchat_app/model/chats.dart';
+import 'package:semi_project_bookchat_app/model/tags.dart';
 import 'package:semi_project_bookchat_app/view/book_search.dart';
+import 'package:hashtagable/hashtagable.dart';
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -20,12 +23,16 @@ class _ChatState extends State<Chat> {
   late CreateDB createDB;
   late ChatDB chatDB;
   late BookDB bookDB;
+  late TagDB tagDB;
 
   List<String> tags = ['#hi', '#필사', '#my', '#hello'];
   late TextEditingController tfBookController;
   late TextEditingController tfChatController;
   late int currentBookId;
   late String currentBookTitle;
+
+  //태그 글자
+  late String tagText;
 
   @override
   void initState() {
@@ -37,12 +44,16 @@ class _ChatState extends State<Chat> {
     tfBookController = TextEditingController();
     tfChatController = TextEditingController();
     bookDB = BookDB();
+    tagDB = TagDB();
 
     currentBookId = 0;
     currentBook();
 
     //임시 함수
     bookDataCount();
+
+    //태그글자 초기값
+    tagText = '';
   }
 
   // book data 잘 들어가는지 확인 용도 임시 함수
@@ -149,7 +160,18 @@ class _ChatState extends State<Chat> {
                               child: Padding(
                                 padding: const EdgeInsets.all(15.0),
                                 // -------------------------------------------- chat bubble
-                                child: Text(snapshot.data![index].cContent),
+                                //Text위젯대신에 HashTagText 위젯사용
+                                child: HashTagText(
+                                  text: snapshot.data![index].cContent,
+                                  //기본글씨
+                                  basicStyle: const TextStyle(
+                                      fontSize: 15, color: Colors.black),
+                                  //태그 글씨
+                                  decoratedStyle: const TextStyle(
+                                      fontSize: 15,
+                                      color: Color.fromARGB(255, 241, 57, 125),
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           );
@@ -215,7 +237,7 @@ class _ChatState extends State<Chat> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       // ------------------------------------------------- 채팅 tf
-                      child: TextField(
+                      child: HashTagTextField(
                         controller: tfChatController,
                         decoration: const InputDecoration(
                           enabledBorder: UnderlineInputBorder(
@@ -225,6 +247,27 @@ class _ChatState extends State<Chat> {
                             borderSide: BorderSide(color: Colors.transparent),
                           ),
                         ),
+                        //기본글자
+                        basicStyle:
+                            const TextStyle(fontSize: 15, color: Colors.black),
+                        //태그 들어간 글자
+                        decoratedStyle: const TextStyle(
+                            fontSize: 15,
+                            color: Color.fromARGB(255, 241, 57, 125),
+                            fontWeight: FontWeight.bold),
+
+                        //태그글자를 담는역할
+                        onDetectionTyped: (text) {
+                          setState(() {
+                            tagText = text;
+                          });
+                          // print(text);
+                        },
+
+                        ///태그글자를 print로 찍는역할, tagText가 태그 글자이다.
+                        onDetectionFinished: () {
+                          print(tagText);
+                        },
                       ),
                     ),
                   ),
@@ -235,6 +278,7 @@ class _ChatState extends State<Chat> {
                       //tfChatController 전송
                       setState(() {
                         addChat();
+                        addTag();
                         // regExp();
                         tfChatController.text = "";
                       });
@@ -295,6 +339,12 @@ class _ChatState extends State<Chat> {
     Chats chat = Chats(
         cDate: 20221226, cContent: tfChatController.text, bId: currentBookId);
     await chatDB.insertChat(chat);
+    return 0;
+  }
+
+  Future<int> addTag() async {
+    Tags tag = Tags(tTitle: tagText);
+    await tagDB.insertTag(tag);
     return 0;
   }
 
