@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:semi_project_bookchat_app/database/book_db.dart';
 import 'package:semi_project_bookchat_app/view/tagroom.dart';
 import 'main/mainpage.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late TabController controller;
+  BookDB bookDB = BookDB();
+  List bookList = [];
 
   @override
   void initState() {
@@ -38,10 +41,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ],
       ),
       extendBody: true,
-      // ------------------------- 가운데 채팅 버튼 -------------------
+      // ------------------------- 가운데 채팅 버튼 ----------------------------
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.toNamed('/chat');
+        onPressed: () async {
+          if (bookList.isEmpty) {
+            // bookDB.insertDefault();
+          }
+          await Get.toNamed('/chat');
+          setState(() {});
         },
         backgroundColor: const Color(0xffB3C8FE),
         child: const Icon(CupertinoIcons.chat_bubble_fill),
@@ -96,4 +103,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ),
     );
   }
-}
+
+  checkNull() async {
+    bookList = await bookDB.queryBooks();
+  }
+}//END
