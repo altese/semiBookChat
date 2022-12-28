@@ -5,8 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:semi_project_bookchat_app/database/book_db.dart';
 import 'package:semi_project_bookchat_app/database/chat_db.dart';
 import 'package:semi_project_bookchat_app/database/create_database.dart';
+import 'package:semi_project_bookchat_app/database/tag_db.dart';
 import 'package:semi_project_bookchat_app/model/book_info.dart';
 import 'package:semi_project_bookchat_app/model/chats.dart';
+import 'package:semi_project_bookchat_app/model/tags.dart';
 import 'package:semi_project_bookchat_app/view/book_search.dart';
 import 'package:hashtagable/hashtagable.dart';
 
@@ -21,6 +23,7 @@ class _ChatState extends State<Chat> {
   late CreateDB createDB;
   late ChatDB chatDB;
   late BookDB bookDB;
+  late TagDB tagDB;
 
   List<String> tags = ['#hi', '#필사', '#my', '#hello'];
   late TextEditingController tfBookController;
@@ -41,6 +44,7 @@ class _ChatState extends State<Chat> {
     tfBookController = TextEditingController();
     tfChatController = TextEditingController();
     bookDB = BookDB();
+    tagDB = TagDB();
 
     currentBookId = 0;
     currentBook();
@@ -274,6 +278,7 @@ class _ChatState extends State<Chat> {
                       //tfChatController 전송
                       setState(() {
                         addChat();
+                        addTag();
                         // regExp();
                         tfChatController.text = "";
                       });
@@ -334,6 +339,12 @@ class _ChatState extends State<Chat> {
     Chats chat = Chats(
         cDate: 20221226, cContent: tfChatController.text, bId: currentBookId);
     await chatDB.insertChat(chat);
+    return 0;
+  }
+
+  Future<int> addTag() async {
+    Tags tag = Tags(tTitle: tagText);
+    await tagDB.insertTag(tag);
     return 0;
   }
 

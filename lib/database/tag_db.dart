@@ -9,8 +9,7 @@ class TagDB {
   Future<int> insertTag(Tags tags) async {
     int result = 0;
     final Database db = await createDB.initializeDB();
-    result = await db.rawInsert('insert into tag(tId, tTitle) values(?,?)', [
-      tags.tId,
+    result = await db.rawInsert('insert into tag(tTitle) values(?)', [
       tags.tTitle,
     ]);
     return result;
